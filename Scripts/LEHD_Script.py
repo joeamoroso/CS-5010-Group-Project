@@ -44,7 +44,8 @@ for year in years:
 for file in os.listdir():
     if file.endswith('.gz'):
         file_s = file[:-3]
-        with gzip.open(file,'rb') as f_in:
-            with gzip.open(file_s,'wb') as f_out:
-                shutil.copyfileobj(f_in,f_out)
+        with gzip.open(file,'rt') as f_in:
+            with open(file_s,'wt') as f_out:
+               data =  f_in.read()
+               f_out.write(data)
 
