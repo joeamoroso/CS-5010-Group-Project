@@ -12,12 +12,13 @@ import wget
 import requests
 import gzip
 import shutil
+import functools
 # =============================================================================
 # Gather US Census LEHD Data from HTTS links
 # =============================================================================
 states = ['dc','md','va']
 types = ['JT00','JT03','JT04']
-years = ['2011','2012','2013','2014','2015','2016','2017']
+years = ['2011','2012','2013','2014','2015']
 
 files = []
 
@@ -46,9 +47,19 @@ for file in os.listdir():
             with open(file_s,'wt') as f_out:
               shutil.copyfileobj(f_in, f_out)
 
-# Read in each created CSV to a list
+# Read in each created CSV to a list, add year and employment type to each df
 data_list = []
 for file in os.listdir():
     if file.endswith('.csv'):
+       year = file[:-4]
+       emp = file[:-9]
+       year = file[len(year) -4:len(year)]
+       emp = emp[len(emp) -4:len(emp)]
        data = pd.read_csv(file)
+       data['Year'] = year
+       data['Emp_Type'] = emp
        data_list.append(data)
+
+df = pd.concat(data_list)
+
+
