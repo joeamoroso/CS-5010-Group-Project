@@ -12,8 +12,6 @@ import wget
 import requests
 import gzip
 import shutil
-
-
 # =============================================================================
 # Gather US Census LEHD Data from HTTS links
 # =============================================================================
@@ -46,6 +44,11 @@ for file in os.listdir():
         file_s = file[:-3]
         with gzip.open(file,'rt') as f_in:
             with open(file_s,'wt') as f_out:
-               data =  f_in.read()
-               f_out.write(data)
+              shutil.copyfileobj(f_in, f_out)
 
+# Read in each created CSV to a list
+data_list = []
+for file in os.listdir():
+    if file.endswith('.csv'):
+       data = pd.read_csv(file)
+       data_list.append(data)
