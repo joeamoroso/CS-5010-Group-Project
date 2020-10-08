@@ -88,7 +88,7 @@ df.rename(columns = {'CNS01': 'NAICS_11',
                      'CNS17': 'NAICS_71',
                      'CNS18': 'NAICS_72',
                      'CNS19': 'NAICS_81',
-                     'CNS20': 'NAICS-92'},inplace = True)
+                     'CNS20': 'NAICS_92'},inplace = True)
 
 df.to_csv('all_LEHD_2011-2015.csv')
 
