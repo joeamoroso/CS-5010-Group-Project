@@ -7,12 +7,10 @@ Created on Sat Oct  3 15:33:21 2020
 import os
 import pandas as pd
 import numpy as np
-import tarfile
-import wget
 import requests
 import gzip
 import shutil
-import functools
+
 # =============================================================================
 # Gather US Census LEHD Data from HTTS links
 # =============================================================================
@@ -62,4 +60,35 @@ for file in os.listdir():
 
 df = pd.concat(data_list)
 
+# =============================================================================
+# Data Queries
+# =============================================================================
+
+# Renaming Employment Types # 
+df['Emp_Type'] = np.where(df['Emp_Type'] == 'JT00','All',df['Emp_Type'])
+df['Emp_Type'] = np.where(df['Emp_Type'] == 'JT03','Private',df['Emp_Type'])
+df['Emp_Type'] = np.where(df['Emp_Type'] == 'JT04','Federal',df['Emp_Type'])
+
+df.rename(columns = {'CNS01': 'NAICS_11',
+                     'CNS02': 'NAICS_21',
+                     'CNS03': 'NAICS_22',
+                     'CNS04': 'NAICS_23',
+                     'CNS05': 'NAICS_31_33',
+                     'CNS06': 'NAICS_42',
+                     'CNS07': 'NAICS_44_45',
+                     'CNS08': 'NAICS_48_49',
+                     'CNS09': 'NAICS_51',
+                     'CNS10': 'NAICS_52',
+                     'CNS11': 'NAICS_53',
+                     'CNS12': 'NAICS_54',
+                     'CNS13': 'NAICS_55',
+                     'CNS14': 'NAICS_56',
+                     'CNS15': 'NAICS_61',
+                     'CNS16': 'NAICS_62',
+                     'CNS17': 'NAICS_71',
+                     'CNS18': 'NAICS_72',
+                     'CNS19': 'NAICS_81',
+                     'CNS20': 'NAICS-92'},inplace = True)
+
+df.to_csv('all_LEHD_2011-2015.csv')
 
