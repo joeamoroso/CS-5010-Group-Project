@@ -90,5 +90,16 @@ df.rename(columns = {'CNS01': 'NAICS_11',
                      'CNS19': 'NAICS_81',
                      'CNS20': 'NAICS_92'},inplace = True)
 
-df.to_csv('all_LEHD_2011-2015.csv')
+# Get and aggreagate data by Census Tract (11 digit) from Block Level (15 digit) #
+df['GEOID'] = df['w_geocode'].astype(str).str.slice(0, 10)
+df['GEOID'] = df['GEOID'].astype('int64')
+
+df_tract = df[['GEOID','NAICS_11','NAICS_21','NAICS_22','NAICS_23',
+               'NAICS_31_33','NAICS_42','NAICS_44_45','NAICS_48_49',
+               'NAICS_51','NAICS_52','NAICS_53','NAICS_54','NAICS_55','NAICS_56',
+               'NAICS_61','NAICS_62','NAICS_71','NAICS_72','NAICS_81','NAICS_92']].groupby(['GEOID']).agg('sum').reset_index()
+
+# TODO Add back in year and employment type # 
+
+#df_tract.to_csv('all_LEHD_2011-2015_tract.csv')
 
