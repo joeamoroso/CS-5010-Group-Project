@@ -95,7 +95,7 @@ df.rename(columns = {'CNS01': 'NAICS_11',
                      'CNS20': 'NAICS_92'},inplace = True)
 
 # Get and aggreagate data by Census Tract (11 digit) from Block Level (15 digit) #
-df['GEOID'] = df['w_geocode'].astype(str).str.slice(0, 10)
+df['GEOID'] = df['w_geocode'].astype(str).str.slice(0, 11)
 df['GEOID'] = df['GEOID'].astype('int64')
 
 # Aggregate Data by Tract, Year, and Employment Group 
@@ -110,9 +110,7 @@ df_tract = df[['GEOID','Year','Emp_Type','NAICS_11','NAICS_21','NAICS_22','NAICS
 #  Import DMV Shapefile and join Data 
 # =============================================================================
 dmv = gpd.read_file('C:/CS-5010-Group-Project/DC_MD_VA_Tracts.shp')
-dmv.plot()
-
-
+dmv.plot(facecolor = 'none',edgecolor ='black', lw =0.4)
 
 
 
