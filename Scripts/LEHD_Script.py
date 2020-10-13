@@ -105,6 +105,7 @@ df_tract = df[['GEOID','Year','Emp_Type','NAICS_11','NAICS_21','NAICS_22','NAICS
                'NAICS_51','NAICS_52','NAICS_53','NAICS_54','NAICS_55','NAICS_56',
                'NAICS_61','NAICS_62','NAICS_71','NAICS_72','NAICS_81','NAICS_92']].groupby(['GEOID','Year','Emp_Type']).agg('sum').reset_index()
 
+df_tract.to_csv('LEHD_Tract.csv')
 
 # =============================================================================
 #  Import DMV Shapefile and join Data 
