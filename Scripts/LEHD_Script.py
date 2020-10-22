@@ -110,7 +110,7 @@ df_tract.to_csv('LEHD_Tract.csv')
 # =============================================================================
 #  Import DMV Shapefile and join Data 
 # =============================================================================
-dmv = gpd.read_file('C:/CS-5010-Group-Project/DC_MD_VA_Tracts.shp')
+dmv = gpd.read_file('C:/CS-5010-Group-Project/Shapefile/DC_MD_VA_Tracts.shp')
 dmv.plot(facecolor = 'none',edgecolor ='black', lw =0.4)
 
 
