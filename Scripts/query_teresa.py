@@ -3,7 +3,6 @@
 """
 Looks at the data and puts on the map the query of finance and insurance employment in three states in private sector only
 
-@author: shinypaul
 """
 
 import os
