@@ -14,8 +14,6 @@ import plotly.io as pio
 import plotly.express as px
 import plotly as plt
 import os
-import pandas as pd
-import numpy as np
 os.chdir("C:/CS-5010-Group-Project")
 # read csv of scraped data
 df = pd.read_csv('Data/LEHD_Tract.csv')
