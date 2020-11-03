@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import pandas as pd
 import numpy as np
@@ -12,6 +13,9 @@ import json
 import plotly.io as pio
 import plotly.express as px
 import plotly as plt
+import os
+import pandas as pd
+import numpy as np
 os.chdir("C:/CS-5010-Group-Project")
 # read csv of scraped data
 df = pd.read_csv('Data/LEHD_Tract.csv')
@@ -54,3 +58,32 @@ fig.show(renderer="browser")
 plt.offline.plot(fig,filename ='Data/log_tot-emp.html')
 
 # fig.show()
+
+# =============================================================================
+# How does DC compare to Baltimore in terms of Government Employment for the past
+# 5 years?
+# =============================================================================
+
+# First 5 digits of GEOID is county ID #
+df['COUNTYID'] = df['GEOID'].astype(str).str.slice(0, 5)
+df['STATEID'] = df['GEOID'].astype(str).str.slice(0, 2)
+df['COUNTYID'] = df['COUNTYID'].astype('int64')
+df['STATEID'] = df['STATEID'].astype('int64')
+
+# Baltimore City FIPS = 24510
+dc_bc = df.query(('COUNTYID == 24510 or STATEID == 11'))
+
+dc_bc = dc_bc[['GEOID','COUNTYID','STATEID','NAICS_92']]
+
+
+# =============================================================================
+# Compare highest employment and lowest employment counties in the DMV area
+# =============================================================================
+
+counties = df[['COUNTYID','Tot_Emp']].groupby(['COUNTYID']).agg('sum')
+
+max_min = counties[(counties['Tot_Emp'] == max(counties['Tot_Emp'])) | (counties['Tot_Emp'] == min(counties['Tot_Emp']))]
+
+
+
+

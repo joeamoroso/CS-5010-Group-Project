@@ -24,8 +24,6 @@ states = ['dc','md','va']
 types = ['JT00','JT03','JT04']
 years = ['2011','2012','2013','2014','2015']
 
-files = []
-
 os.chdir('C:\\CS-5010-Group-Project\\Data\\')
 
 # Loop through years 2011-2017 for DC, MD, VA and extract total, federal, and private employment tarfiles
@@ -95,7 +93,10 @@ df.rename(columns = {'C000': 'Tot_Emp',
                      'CNS17': 'NAICS_71',
                      'CNS18': 'NAICS_72',
                      'CNS19': 'NAICS_81',
-                     'CNS20': 'NAICS_92'},inplace = True)
+                     'CNS20': 'NAICS_92',
+                     'CE01' : 'NAICS_1250',
+                     'CE02' : 'NAICS_1251_3333',
+                     'CE03' : 'NAICS_3333'},inplace = True)
 
 # Get and aggreagate data by Census Tract (11 digit) from Block Level (15 digit) #
 df['GEOID'] = df['w_geocode'].astype(str).str.slice(0, 11)
@@ -106,7 +107,10 @@ df['GEOID'] = df['GEOID'].astype('int64')
 df_tract = df[['GEOID','Year','Emp_Type','Tot_Emp','NAICS_11','NAICS_21','NAICS_22','NAICS_23',
                'NAICS_31_33','NAICS_42','NAICS_44_45','NAICS_48_49',
                'NAICS_51','NAICS_52','NAICS_53','NAICS_54','NAICS_55','NAICS_56',
-               'NAICS_61','NAICS_62','NAICS_71','NAICS_72','NAICS_81','NAICS_92']].groupby(['GEOID','Year','Emp_Type']).agg('sum').reset_index()
+               'NAICS_61','NAICS_62','NAICS_71','NAICS_72','NAICS_81','NAICS_92',
+               'NAICS_1250','NAICS_1251_3333','NAICS_3333']].groupby(['GEOID','Year','Emp_Type']).agg('sum').reset_index()
+
+df_tract.head()
 
 df_tract.to_csv('LEHD_Tract.csv',index = False)
 
@@ -115,7 +119,6 @@ df_tract.to_csv('LEHD_Tract.csv',index = False)
 # =============================================================================
 dmv = gpd.read_file('C:/CS-5010-Group-Project/Shapefile/DC_MD_VA_Tracts.shp')
 dmv.plot(facecolor = 'none',edgecolor ='black', lw =0.4)
-
 
 # =============================================================================
 # Queries
