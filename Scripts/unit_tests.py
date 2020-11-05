@@ -20,16 +20,6 @@ class test_scraped_files(unittest.TestCase):
         self.assertEqual(len(files),45) # Assert that there are 45 tar files.
 
 
-
-if __name__ == '__main__':
-    unittest.main()    
-
-
-import unittest
-import os
-from LEHD_Script import *
-
-
 # =============================================================================
 # Make sure all GEOIDs are 11 digits
 # =============================================================================
