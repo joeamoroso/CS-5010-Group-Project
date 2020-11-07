@@ -24,7 +24,9 @@ states = ['dc','md','va']
 types = ['JT00','JT03','JT04']
 years = ['2011','2012','2013','2014','2015']
 
-os.chdir('C:\\CS-5010-Group-Project\\Data\\')
+os.chdir(os.path.dirname(__file__))
+os.chdir('..')
+os.chdir('Data')
 
 # Loop through years 2011-2017 for DC, MD, VA and extract total, federal, and private employment tarfiles
 try:
@@ -123,7 +125,7 @@ df_tract.to_csv('LEHD_Tract.csv',index = False)
 # =============================================================================
 #  Import DMV Shapefile and join Data 
 # =============================================================================
-dmv = gpd.read_file('C:/CS-5010-Group-Project/Shapefile/DC_MD_VA_Tracts.shp')
+dmv = gpd.read_file('CS-5010-Group-Project/Shapefile/DC_MD_VA_Tracts.shp')
 dmv.plot(facecolor = 'none',edgecolor ='black', lw =0.4)
 
 # =============================================================================
