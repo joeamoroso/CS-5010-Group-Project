@@ -64,25 +64,26 @@ plt.offline.plot(fig,filename ='Data/log_tot-emp.html')
 # =============================================================================
 
 # First 5 digits of GEOID is county ID #
+
 df['COUNTYID'] = df['GEOID'].astype(str).str.slice(0, 5)
 df['STATEID'] = df['GEOID'].astype(str).str.slice(0, 2)
 df['COUNTYID'] = df['COUNTYID'].astype('int64')
 df['STATEID'] = df['STATEID'].astype('int64')
 
 # Baltimore City FIPS = 24510
-dc_bc = df.query(('COUNTYID == 24510 or STATEID == 11'))
+dc_bc = df.query(('COUNTYID == 24510 or STATEID == 11 and Emp_Type =="All"'))
 
-dc_bc = dc_bc[['GEOID','COUNTYID','STATEID','NAICS_92']]
+dc_bc = dc_bc[['GEOID','COUNTYID','STATEID','Tot_Emp']]
 
 
 # =============================================================================
-# Compare highest employment and lowest employment counties in the DMV area
+# Compare highest employment and lowest employment dc_bc in the DMV area
 # =============================================================================
 
-counties = df[['COUNTYID','Tot_Emp']].groupby(['COUNTYID']).agg('sum')
+dc_bc_agg = dc_bc[['COUNTYID','Tot_Emp']].groupby(['COUNTYID']).agg('mean')
+dc_bc_agg
+max_min = dc_bc[(dc_bc['Tot_Emp'] == max(dc_bc['Tot_Emp'])) | (dc_bc['Tot_Emp'] == min(dc_bc['Tot_Emp']))]
 
-max_min = counties[(counties['Tot_Emp'] == max(counties['Tot_Emp'])) | (counties['Tot_Emp'] == min(counties['Tot_Emp']))]
-
-
+max_min 
 
 
