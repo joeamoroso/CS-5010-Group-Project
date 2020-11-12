@@ -30,7 +30,7 @@ class test_geoids(unittest.TestCase):
         ids = df_tract['GEOID'].astype('str')
         id_list = list(map(len,ids))
         ret = [x for x in id_list if x == 11]
-        self.assertTrue(len(id_list),len(ret))    
+        self.assertEqual(len(id_list),len(ret))    
 
     
 

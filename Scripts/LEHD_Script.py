@@ -2,7 +2,6 @@
 """
 Created on Sat Oct  3 15:33:21 2020
 
-@author: Joe
 """
 import os
 import pandas as pd
@@ -16,6 +15,7 @@ from descartes import PolygonPatch
 from shapely.geometry import Point, LineString, Polygon, shape, GeometryCollection
 import json
 import plotly.express as px
+import plotly
 
 # =============================================================================
 # Gather US Census LEHD Data from HTTS links
@@ -123,29 +123,191 @@ df_tract.head()
 df_tract.to_csv('LEHD_Tract.csv',index = False)
 
 # =============================================================================
-#  Import DMV Shapefile and join Data 
-# =============================================================================
-#dmv = gpd.read_file('Shapefile/DC_MD_VA_Tracts.shp')
-#dmv.plot(facecolor = 'none',edgecolor ='black', lw =0.4)
-
-# =============================================================================
 # Queries
 # =============================================================================
-# with open('geojson/DC_Metro_Area_WGS.geojson') as f:
-#   dc_tracts = json.load(f)
+df = pd.read_csv('LEHD_Tract.csv')
+os.chdir('..')
+# read shapefile
+dc_shapes = gpd.read_file('Shapefile/DC_MD_VA_Tracts.shp')
+# convert GEOID column to int64 for joining
+dc_shapes['GEOID'] = dc_shapes['GEOID'].astype('int64')
+# join with shapefile on GEOID
+dat = df.merge(dc_shapes, how = 'left', on = "GEOID")
+# remove Delaware
+dat = dat[dat["STATEFP"] != 10]
+# remove Pennsylvania
+dat = dat[dat["STATEFP"] != 42]
+# don't use federal or private
+dat = dat[dat['Emp_Type'] == "All"]
+# log transform column of interest
+dat['log_Tot_Emp'] = np.log10(dat['Tot_Emp'] + .000000001)
 
-# dat = pd.read_csv('LEHD_Tract.csv')
+# read json
+with open('geojson/DC_Metro_Area.geojson') as f:
+  dc_tracts = json.load(f)
+  
+# total employment
+max_value = dat['log_Tot_Emp'].max()
+fig = px.choropleth_mapbox(dat, geojson=dc_tracts, locations='GEOID',       
+                           color='log_Tot_Emp',
+                           color_continuous_scale="Inferno",
+                           range_color=(0, max_value),
+                           featureidkey="properties.GEOID",
+                           animation_frame="Year",
+                           #projection="mercator"
+                           mapbox_style="carto-positron",
+                           center = {"lat": 38, "lon": -77},
+                           zoom = 5
+                          )
+fig.update_geos(fitbounds="locations", visible=False)
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+fig.show(renderer="browser")
+plotly.offline.plot(fig,filename ='Data/log_tot-emp.html')
 
-# max_value = dat['NAICS_62'].max()
-# fig = px.choropleth(dat, geojson=dc_tracts, locations='GEOID',       
-#                            color='NAICS_21',
-#                            color_continuous_scale="Viridis",
-#                            range_color=(0, max_value),
-#                            featureidkey="properties.GEOID",
-#                            projection="mercator"
-#                           )
-# fig.update_geos(fitbounds="locations", visible=False)
-# fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+# fig.show()
+
+# =============================================================================
+# How does DC compare to Baltimore in terms of Government Employment for the past
+# 5 years?
+# =============================================================================
+
+# First 5 digits of GEOID is county ID #
+
+df['COUNTYID'] = df['GEOID'].astype(str).str.slice(0, 5)
+df['STATEID'] = df['GEOID'].astype(str).str.slice(0, 2)
+df['COUNTYID'] = df['COUNTYID'].astype('int64')
+df['STATEID'] = df['STATEID'].astype('int64')
+
+# Baltimore City FIPS = 24510
+dc_bc = df.query(('COUNTYID == 24510 or STATEID == 11 and Emp_Type =="All"'))
+
+dc_bc = dc_bc[['GEOID','COUNTYID','STATEID','Tot_Emp']]
+
+
+# =============================================================================
+# Compare highest employment and lowest employment dc_bc in the DMV area
+# =============================================================================
+
+dc_bc_agg = dc_bc[['COUNTYID','Tot_Emp']].groupby(['COUNTYID']).agg('mean')
+dc_bc_agg
+max_min = dc_bc[(dc_bc['Tot_Emp'] == max(dc_bc['Tot_Emp'])) | (dc_bc['Tot_Emp'] == min(dc_bc['Tot_Emp']))]
+
+# =============================================================================
+# Income Queries
+# =============================================================================
+
+df = df_tract
+newdf = df[['GEOID','Year','Emp_Type','NAICS_1250','NAICS_1251_3333','NAICS_3333']]
+#Queries for fun 
+print(newdf)
+
+print(newdf[0:2].sum())
+print('--------------------------')
+max_value = newdf.max()
+print(max_value)
+#Visualizations
+# read shapefile
+dc_shapes = gpd.read_file('Shapefile/DC_MD_VA_Tracts.shp')
+# convert GEOID column to int64 for joining
+dc_shapes['GEOID'] = dc_shapes['GEOID'].astype('int64')
+# join with shapefile on GEOID
+dat = newdf.merge(dc_shapes, how = 'left', on = "GEOID")
+# remove Delaware
+dat = dat[dat["STATEFP"] != 10]
+# remove Pennsylvania
+dat = dat[dat["STATEFP"] != 42]
+# don't use federal or private
+dat = dat[dat['Emp_Type'] == "All"]
+# log transform column of interest
+#dat['NAICS_3333'] = np.log10(dat['NAICS_62'] + .000000001)
+import plotly.express as px
+# read json
+with open('geojson/DC_Metro_Area.geojson') as f:
+  dc_tracts = json.load(f)
+import plotly.io as pio
+pio.renderers
+# total employment
+
+max_value = 1000
+
+fig = px.choropleth_mapbox(dat, geojson=dc_tracts, locations='GEOID',
+                           color = 'NAICS_3333',
+                           color_continuous_scale="Inferno",
+                           range_color=(0, max_value),
+                           featureidkey="properties.GEOID",
+                           animation_frame="Year",
+                           #projection="mercator"
+                           mapbox_style="carto-positron",
+                           center = {"lat": 38, "lon": -77},
+                           zoom = 5
+                          )
+fig.update_geos(fitbounds="locations", visible=False)
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+fig.show(renderer="browser")
+plotly.offline.plot(fig,filename ='Data/income.html')
+
+# =============================================================================
+# Private Employment
+# =============================================================================
+
+df = df_tract
+# read shapefile
+dc_shapes = gpd.read_file('Shapefile/DC_MD_VA_Tracts.shp')
+# convert GEOID column to int64 for joining
+dc_shapes['GEOID'] = dc_shapes['GEOID'].astype('int64')
+# join with shapefile on GEOID
+dat = df.merge(dc_shapes, how = 'left', on = "GEOID")
+
+# remove Delaware
+dat = dat[dat["STATEFP"] != 10]
+# remove Pennsylvania
+dat = dat[dat["STATEFP"] != 42]
+
+
+#PRIVATE ONLY
+# don't use federal or all
+dat = dat[dat['Emp_Type'] == "Private"]
+
+# log transform column of interest - Finance and Insurance
+dat['log_NAICS_52'] = np.log10(dat['NAICS_52'] + .000000001)
+
+# read json
+with open('geojson/DC_Metro_Area.geojson') as f:
+  dc_tracts = json.load(f)
+
+# private employment
+max_value = dat['log_NAICS_52'].max()
+fig = px.choropleth_mapbox(dat, geojson=dc_tracts, locations='GEOID',       
+                           color='log_NAICS_52',
+                           color_continuous_scale="Inferno",
+                           range_color=(0, max_value),
+                           featureidkey="properties.GEOID",
+                           animation_frame="Year",
+                           #projection="mercator"
+                           mapbox_style="carto-positron",
+                           center = {"lat": 38, "lon": -77},
+                           zoom = 5
+                          )
+fig.update_geos(fitbounds="locations", visible=False)
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+fig.show(renderer="browser")
+plotly.offline.plot(fig,filename ='Data/naics_52.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
