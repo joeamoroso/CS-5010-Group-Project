@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import pandas as pd
 import numpy as np
@@ -9,11 +10,17 @@ import matplotlib.pyplot as plt
 from descartes import PolygonPatch
 from shapely.geometry import Point, LineString, Polygon, shape, GeometryCollection
 import json
-os.chdir("/Users/travisknoche/Documents/grad_school/fall_2020/cs_5010/CS-5010-Group-Project")
+import plotly.io as pio
+import plotly.express as px
+import plotly as plt
+import os
+os.chdir(os.path.dirname(__file__))
+os.chdir('..')
 # read csv of scraped data
 df = pd.read_csv('Data/LEHD_Tract.csv')
+
 # read shapefile
-dc_shapes = gpd.read_file('/Users/travisknoche/Documents/grad_school/fall_2020/cs_5010/CS-5010-Group-Project/Shapefile/DC_Metro/DC_Metro_Area.shp')
+dc_shapes = gpd.read_file('Shapefile/DC_MD_VA_Tracts.shp')
 # convert GEOID column to int64 for joining
 dc_shapes['GEOID'] = dc_shapes['GEOID'].astype('int64')
 # join with shapefile on GEOID
@@ -25,17 +32,16 @@ dat = dat[dat["STATEFP"] != 42]
 # don't use federal or private
 dat = dat[dat['Emp_Type'] == "All"]
 # log transform column of interest
-dat['log_NAICS_62'] = np.log10(dat['NAICS_62'] + .000000001)
-import plotly.express as px
+dat['log_Tot_Emp'] = np.log10(dat['Tot_Emp'] + .000000001)
+
 # read json
-with open('geojson/DC_Metro_Area_WGS.geojson') as f:
+with open('geojson/DC_Metro_Area.geojson') as f:
   dc_tracts = json.load(f)
-import plotly.io as pio
-pio.renderers
+  
 # total employment
-max_value = dat['log_NAICS_62'].max()
+max_value = dat['log_Tot_Emp'].max()
 fig = px.choropleth_mapbox(dat, geojson=dc_tracts, locations='GEOID',       
-                           color='log_NAICS_62',
+                           color='log_Tot_Emp',
                            color_continuous_scale="Inferno",
                            range_color=(0, max_value),
                            featureidkey="properties.GEOID",
@@ -48,4 +54,36 @@ fig = px.choropleth_mapbox(dat, geojson=dc_tracts, locations='GEOID',
 fig.update_geos(fitbounds="locations", visible=False)
 fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 fig.show(renderer="browser")
+plt.offline.plot(fig,filename ='Data/log_tot-emp.html')
+
 # fig.show()
+
+# =============================================================================
+# How does DC compare to Baltimore in terms of Government Employment for the past
+# 5 years?
+# =============================================================================
+
+# First 5 digits of GEOID is county ID #
+
+df['COUNTYID'] = df['GEOID'].astype(str).str.slice(0, 5)
+df['STATEID'] = df['GEOID'].astype(str).str.slice(0, 2)
+df['COUNTYID'] = df['COUNTYID'].astype('int64')
+df['STATEID'] = df['STATEID'].astype('int64')
+
+# Baltimore City FIPS = 24510
+dc_bc = df.query(('COUNTYID == 24510 or STATEID == 11 and Emp_Type =="All"'))
+
+dc_bc = dc_bc[['GEOID','COUNTYID','STATEID','Tot_Emp']]
+
+
+# =============================================================================
+# Compare highest employment and lowest employment dc_bc in the DMV area
+# =============================================================================
+
+dc_bc_agg = dc_bc[['COUNTYID','Tot_Emp']].groupby(['COUNTYID']).agg('mean')
+dc_bc_agg
+max_min = dc_bc[(dc_bc['Tot_Emp'] == max(dc_bc['Tot_Emp'])) | (dc_bc['Tot_Emp'] == min(dc_bc['Tot_Emp']))]
+
+max_min 
+
+
